@@ -21,6 +21,7 @@ import android.widget.LinearLayout;
 import android.widget.TextView;
 
 import com.coolweather.app.R;
+import com.coolweather.service.AutoUpdateService;
 import com.coolweather.util.Week;
 import com.coolweather.util.HttpCallbackListener;
 import com.coolweather.util.HttpUtils;
@@ -147,6 +148,8 @@ public class WeatherActivity extends Activity implements OnClickListener {
 		temp4.setText(prefs.getString("temp4", ""));
 		temp5.setText(prefs.getString("temp5", ""));
 		temp6.setText(prefs.getString("temp6", ""));
+		Intent intent=new Intent(this,AutoUpdateService.class);
+		startService(intent);
 	}
 	private void queryWeatherCode(String countyCode) {
 		// TODO Auto-generated method stub
