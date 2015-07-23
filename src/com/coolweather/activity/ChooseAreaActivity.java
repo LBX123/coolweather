@@ -18,10 +18,18 @@ import java.util.List;
 
 
 
+
+
+
+
+
 import android.app.Activity;
 import android.app.DownloadManager.Query;
 import android.app.ProgressDialog;
+import android.content.Intent;
+import android.content.SharedPreferences;
 import android.os.Bundle;
+import android.preference.PreferenceManager;
 import android.text.TextUtils;
 import android.view.View;
 import android.view.Window;
@@ -52,7 +60,8 @@ public class ChooseAreaActivity extends Activity {
 	private ArrayAdapter<String> adapter;
 	private CoolWeatherDB coolWeatherDB;
 	private List<String> dataList = new ArrayList<String>();
-	
+	public static final String CITY_SELECTED="city_selected";
+	public static final String COUNTY_CODE="county_code";
 	/**
 	 * 省列表
 	 */
@@ -77,11 +86,17 @@ public class ChooseAreaActivity extends Activity {
 	 * 当前选中的级别
 	 */
 	private int currentLevel;
-	
 	@Override
 	protected void onCreate(Bundle savedInstanceState) {
 		// TODO Auto-generated method stub
 		super.onCreate(savedInstanceState);
+		SharedPreferences prefs=PreferenceManager.getDefaultSharedPreferences(this);
+		if (prefs.getBoolean(CITY_SELECTED, false)) {
+			Intent intent = new Intent(this,WeatherActivity.class);
+			startActivity(intent);
+			finish();
+			return;
+		}
 		requestWindowFeature(Window.FEATURE_NO_TITLE);
 		setContentView(R.layout.choose_area);
 		listView=(ListView) findViewById(R.id.list_view);
@@ -101,6 +116,15 @@ public class ChooseAreaActivity extends Activity {
 				}else if(currentLevel==LEVEL_CITY){
 					selectedCity=cityList.get(index);
 					queryCounties();
+				}else if(currentLevel==LEVEL_COUNTY){
+					String countCode = countyList.get(index).getCountCode();
+					SharedPreferences.Editor editor=PreferenceManager.getDefaultSharedPreferences(ChooseAreaActivity.this).edit();
+					editor.putBoolean(CITY_SELECTED, true);
+					editor.commit();
+					Intent intent = new Intent(ChooseAreaActivity.this,WeatherActivity.class);
+					intent.putExtra(COUNTY_CODE, countCode);
+					startActivity(intent);
+					finish();
 				}
 			}
 		});
@@ -154,34 +178,33 @@ public class ChooseAreaActivity extends Activity {
 	private void queryFromServer(final String code,final String type) {
 		// TODO Auto-generated method stub
 		String address;
-		System.out.println("11111111111111111111111");
+//		System.out.println("11111111111111111111111");
 		if(!TextUtils.isEmpty(code)){
 			address="http://www.weather.com.cn/data/list3/city"+code+".xml";
 		}else{
 			address="http://www.weather.com.cn/data/list3/city.xml";
 		}
 		showProgressDialog();
-		System.out.println("2222222222222222222222222");
+//		System.out.println("2222222222222222222222222");
 		HttpUtils.sendHttpRequest(address, new HttpCallbackListener() {
 			
 			@Override
 			public void onFinish(String response) {
 				// TODO Auto-generated method stub
-				System.out.println("33333333333333333333333333333");
+//				System.out.println("33333333333333333333333333333");
 				boolean result=false;
 				if("province".equals(type)){
 					result=Utility.handleProvincesResponse(coolWeatherDB, response);
 				}else if("city".equals(type)){
 					result=Utility.handleCitiesResponse(coolWeatherDB, response, selectedProvince.getId());
 				}else if("county".equals(type)){
-					System.out.println("555555555555555555555");
+//					System.out.println("555555555555555555555");
 					result=Utility.handleCountiesResponse(coolWeatherDB, response, selectedCity.getId());
-					System.out.println("666666666666666666666666");
 				}
 				if (result) {
 					runOnUiThread(new Runnable() {
 						public void run() {
-							System.out.println("7777777777777777777777");
+//							System.out.println("7777777777777777777777");
 							closeProgressDialog();
 							if ("province".equals(type)) {
 								queryProvinces();
@@ -200,7 +223,7 @@ public class ChooseAreaActivity extends Activity {
 				// TODO Auto-generated method stub
 				runOnUiThread(new Runnable() {
 					public void run() {
-						System.out.println("444444444444444444444444444444444");
+//						System.out.println("444444444444444444444444444444444");
 						e.printStackTrace();
 						closeProgressDialog();
 						Toast.makeText(ChooseAreaActivity.this, "加载失败", Toast.LENGTH_SHORT).show();

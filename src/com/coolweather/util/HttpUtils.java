@@ -29,8 +29,8 @@ public class HttpUtils {
 					while ((line=reader.readLine())!=null) {
 						response.append(line);
 					}
-					Log.d("ChooseAreaActivity", "..........................."+response.toString());
-					System.out.println("...........................");
+//					Log.d("ChooseAreaActivity", "..........................."+response.toString());
+//					System.out.println("...........................");
 					if (listener!=null) {
 						listener.onFinish(response.toString());
 					}
